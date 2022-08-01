@@ -1,4 +1,5 @@
-from Utils import ANSIColors
+from game.TestRoom import TestRoom
+from utils import ANSIColors
 
 
 class PyAdventure:
@@ -10,7 +11,8 @@ class PyAdventure:
         print("A text adventure game prototype developed by Matt Brauner")
         print("(c) Copyright 2022\n")
         print(f"Instructions: Type commands into the prompter to complete the adventure. Available verbs are: "
-              f"{ANSIColors.BLUE} LOOK AT, PICK UP, USE, PUSH, PULL {ANSIColors.ENDC}")
+              f"{ANSIColors.BLUE} LOOK AT, PICK UP, USE, PUSH, PULL {ANSIColors.ENDC}\n")
+        TestRoom()
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-import AdventureObjectInterface
+from engine import AdventureObjectInterface
 
 
 class Inventory:
@@ -25,7 +25,9 @@ class Inventory:
         """
         Returns a boolean indicating whether the player has an object in inventory
         """
+        # TODO FIX ME!
         for i in self.inventory:
             if type(i) is type(obj):
                 return True
         return False
+

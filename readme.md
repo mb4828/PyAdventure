@@ -4,11 +4,11 @@ A text adventure prototype developed in Python. I've tried to take inspiration f
 and create interfaces that make it extremely easy to wire up rooms and objects within them. Only one room is 
 currently implemented but this could be extended to an entire game in the future.
 
-Rooms are defined using the [AdventureRoomInterface](AdventureRoomInterface.py)
+Rooms are defined using the [AdventureRoomInterface](engine/AdventureRoomInterface.py)
 
-Objects defined using the [AdventureObjectInterface](AdventureObjectInterface.py)
+Objects defined using the [AdventureObjectInterface](engine/AdventureObjectInterface.py)
 
-The [Parser](Parser.py) currently supports the following verbs:
+The [Parser](engine/TextParser.py) currently supports the following verbs:
 - Look at
 - Pick up
 - Use

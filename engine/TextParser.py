@@ -1,8 +1,10 @@
-import AdventureObjectInterface
-from Utils import AdventureAction
+import re
+
+from engine import AdventureObjectInterface
+from utils import AdventureAction, ANSIColors
 
 
-class Parser:
+class TextParser:
     """
     Text parser used for parsing player input
     """
@@ -47,3 +49,22 @@ class Parser:
         """
         user_input = input("> ").lower().split(" ")
         return self.__parse_action(user_input), self.__parse_objects(user_input)
+
+    def do_output(self, s: str):
+        """
+        Handles the output of the user's action. In this case - just printing some text
+        Any object that is mentioned is automatically highlighted for the user!
+        """
+        result = []
+        for word in s.split(" "):
+            clean_word = re.sub('\\W', '', word)
+            found_word = False
+            for obj in self.objects:
+                if not found_word and re.search(f" {clean_word} ", f" {' '.join(obj.keywords)} ", re.IGNORECASE):
+                    found_word = True
+                    result.append(f"{ANSIColors.BLUE}{word.upper()}{ANSIColors.ENDC}")
+                    break
+            if not found_word:
+                result.append(word)
+        print(' '.join(result))
+
