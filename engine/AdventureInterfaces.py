@@ -1,4 +1,5 @@
 from engine.AdventureInventory import AdventureInventory
+from engine.AdventureState import AdventureState
 from engine.TextParser import TextParser
 from engine.utils import AdventureAction, ANSIColors
 
@@ -63,11 +64,11 @@ class AdventureObject:
 
     def check_state(self, state):
         """ Shortcut method to check state """
-        return self.room.state[state]
+        return self.room.state.get(state)
 
     def set_state(self, state, value):
         """ Shortcut method to set state """
-        self.room.state[state] = value
+        self.room.state.set(state, value)
 
     def in_inventory(self, obj=None):
         """ Shortcut method to check if an object is in inventory. Pass nothing to check this object """
@@ -105,16 +106,21 @@ class AdventureRoom:
     parser = None
 
     """ Player inventory """
-    inventory = None
+    inventory: AdventureInventory = None
 
     """ Holds state variables for the room """
-    state = {}
+    state: AdventureState = {}
 
-    def __init__(self, inventory=None):
+    def __init__(self, state=None, inventory=None):
+        if state is None:
+            state = AdventureState()
+        self.state = state
+
         if inventory is None:
             inventory = AdventureInventory()
         self.inventory = inventory
         self.__inv = self.InventoryWrapperObject(self, ['inventory', 'inv', 'i'])
+
         self.parser = TextParser(self.get_all_objects_in_room())
 
     def get_all_objects_in_room(self) -> list[AdventureObject]:

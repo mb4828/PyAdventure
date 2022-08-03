@@ -181,14 +181,6 @@ class Lock(AdventureObject):
 
 
 class TestRoom(AdventureRoom):
-    state = {
-        'is_first_look': True,
-        'is_rope_attached': True,
-        'is_dagger_stuck': True,
-        'is_brick_hidden': True,
-        'is_door_locked': True
-    }
-
     def __init__(self):
         self.cell = Cell(self, ['cell', 'room'])
         self.bed = Bed(self, ['bed'])
@@ -206,9 +198,9 @@ class TestRoom(AdventureRoom):
         super().__init__()
 
         self.cell.on_lookat()
-        self.state['is_first_look'] = False
+        self.state.set('is_first_look', False)
 
-        while self.state['is_door_locked'] is True:
+        while self.state.get('is_door_locked') is True:
             (action, objects) = self.parser.wait_for_input()
             if len(objects) is 0:
                 self.parser.do_output(f"{ANSIColors.RED}Could not parse command{ANSIColors.ENDC}")
