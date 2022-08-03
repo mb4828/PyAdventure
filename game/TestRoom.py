@@ -32,7 +32,7 @@ class Bed(AdventureObject):
             self.do_output("It's your standard, everyday prison bed")
 
     def on_pickup(self):
-        self.do_output("The bed is firmly bolted to the floor")
+        self.do_output("The bed is too heavy to move")
 
     def on_push(self):
         self.on_pickup()
@@ -97,7 +97,7 @@ class Brick(AdventureObject):
 
 class Magazine(AdventureObject):
     def on_lookat(self):
-        self.do_output("It's a magazine with a picture of a pirate drinking a piña colada on the beach on the cover")
+        self.do_output("It's a magazine with a picture of a pirate drinking a piña colada on the cover")
 
     def on_pickup(self):
         self.add_to_inventory()
@@ -136,7 +136,7 @@ class Ring(AdventureObject):
 
     def on_pull(self):
         if self.check_state('is_rope_attached'):
-            self.do_output("The rusted metal gives out and the ring crumbles, freeing the rope and your ankle. Guess it wasn't so secure after all!")
+            self.do_output("The rusted metal gives out and the ring crumbles, freeing the rope and your ankle. Guess it wasn't so secure after all")
             self.set_state('is_rope_attached', False)
         else:
             self.do_output("Nothing happens")
@@ -168,7 +168,7 @@ class Dagger(AdventureObject):
 
     def on_pickup(self):
         if self.check_state('is_rope_attached'):
-            self.do_output("You reach for the dagger but the rope around your ankle prevents you from obtaining it")
+            self.do_output("The dagger is across the room... and the rope around your ankle prevents you from reaching it")
         else:
             self.add_to_inventory()
             self.set_state('is_dagger_stuck', False)
@@ -203,7 +203,7 @@ class TestRoom(AdventureRoom):
         while self.state.get('is_door_locked') is True:
             (action, objects) = self.parser.wait_for_input()
             if len(objects) is 0:
-                self.parser.do_output(f"{ANSIColors.RED}Could not parse command{ANSIColors.ENDC}")
+                self.cell.on_unknown()
             else:
                 for obj in objects:
                     obj.perform_action(action)
