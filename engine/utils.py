@@ -1,10 +1,7 @@
 from enum import Enum
 
-
 class AdventureAction(Enum):
-    """
-    Actions the player can perform
-    """
+    """ Actions the player can perform """
     UNKNOWN = 0
     LOOK_AT = 1
     PICK_UP = 2
@@ -14,9 +11,7 @@ class AdventureAction(Enum):
 
 
 class ANSIColors:
-    """
-    Colors to make the command line look less crappy
-    """
+    """ Colors to make the command line look less crappy """
     MAGENTA = '\033[95m'
     BLUE = '\033[94m'
     CYAN = '\033[96m'

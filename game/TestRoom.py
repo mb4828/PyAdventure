@@ -1,43 +1,59 @@
-from engine.AdventureObjectInterface import AdventureObjectInterface
-from engine.AdventureRoomInterface import AdventureRoomInterface
+from engine.AdventureInterfaces import AdventureObject, AdventureRoom
+from engine.utils import ANSIColors
 
 
-class Cell(AdventureObjectInterface):
+class Cell(AdventureObject):
     def on_lookat(self) -> None:
-        text = f"You {'awake' if self.check_state('is_first_look') else 'are'} in a cell containing a bed, a table, and a barred door with a lock on it.\n"
+        text = f"You {'awake' if self.check_state('is_first_look') else 'are'} in a cell containing a bed, a table, and a barred door with a lock on it \n"
 
-        text += "On the bed is a flimsy, thatched mattress, an uncomfortable-looking pillow, and a copy of `Arr and `Arr magazine.\n"
+        text += "On the bed is a flimsy, thatched mattress, an uncomfortable-looking pillow, and a copy of `Arr and `Arr magazine \n"
 
-        if not self.check_state('is_brick_hidden') and not self.room.inventory.has_object(Brick):
-            text += "A heavy brick on the floor near the foot of the bed\n"
+        if not self.check_state('is_brick_hidden') and not self.in_inventory(Brick):
+            text += "A heavy brick sits on the floor near the head of the bed\n"
 
         if self.check_state('is_rope_attached'):
-            text += "A sturdy rope is secured around your ankle, connecting to a metal ring that's screwed into the bed frame.\n"
+            text += "A sturdy rope is secured around your ankle, connecting to a metal ring that's screwed into the bed frame \n"
         else:
-            text += "A sturdy rope is secured around your ankle, the metal ring it was once attached to now a pile of rusty metal.\n"
+            text += "A sturdy rope is secured around your ankle, the metal ring it was once attached to now a pile of rusty metal \n"
 
         if self.check_state('is_dagger_stuck'):
             text += 'Across the room, a rusty dagger stands upright, jammed into the center of a wooden table'
         else:
             text += 'Across the room, there is a wooden table with nothing on it'
 
-        self.set_state('is_first_look', False)
         self.do_output(text)
 
 
-class Bed(AdventureObjectInterface):
+class Bed(AdventureObject):
+    def on_lookat(self) -> None:
+        if self.check_state('is_rope_attached'):
+            self.do_output("It's your standard, everyday prison bed. A rusty, metal ring is screwed into the bed frame")
+        else:
+            self.do_output("It's your standard, everyday prison bed")
+
+    def on_pickup(self):
+        self.do_output("The bed is firmly bolted to the floor")
+
+    def on_push(self):
+        self.on_pickup()
+
+    def on_pull(self):
+        self.on_pickup()
+
+
+class Mattress(AdventureObject):
     pass
 
 
-class Fish(AdventureObjectInterface):
+class Fish(AdventureObject):
     pass
 
 
-class Oil(AdventureObjectInterface):
+class Oil(AdventureObject):
     pass
 
 
-class Pillow(AdventureObjectInterface):
+class Pillow(AdventureObject):
     def on_lookat(self):
         if self.check_state('is_brick_hidden'):
             self.do_output("It's an uncomfortable-looking pillow")
@@ -48,10 +64,7 @@ class Pillow(AdventureObjectInterface):
         if self.check_state('is_brick_hidden'):
             self.do_output("As you pick the pillow up, a heavy brick falls out. No wonder it was so uncomfortable!")
             self.set_state('is_brick_hidden', False)
-        elif self.in_inventory():
-            self.do_output("The pillow is in your inventory")
         else:
-            self.do_output("Pillow added to inventory")
             self.add_to_inventory()
 
     def on_push(self):
@@ -64,7 +77,7 @@ class Pillow(AdventureObjectInterface):
         self.on_push()
 
 
-class Brick(AdventureObjectInterface):
+class Brick(AdventureObject):
     def on_lookat(self):
         if self.check_state('is_brick_hidden'):
             self.on_unknown()
@@ -75,19 +88,26 @@ class Brick(AdventureObjectInterface):
         if self.check_state('is_brick_hidden'):
             self.on_unknown()
         else:
-            self.do_output("Brick has been added to your inventory")
-            self.room.inventory.add_object(self)
+            self.add_to_inventory()
 
     def on_use(self, use_with):
         # TODO
         pass
 
 
-class Magazine(AdventureObjectInterface):
-    pass
+class Magazine(AdventureObject):
+    def on_lookat(self):
+        self.do_output("It's a magazine with a picture of a pirate drinking a piña colada on the beach on the cover")
+
+    def on_pickup(self):
+        self.add_to_inventory()
+
+    def on_use(self, use_with):
+        # TODO
+        pass
 
 
-class Rope(AdventureObjectInterface):
+class Rope(AdventureObject):
     def on_lookat(self):
         if self.check_state('is_rope_attached'):
             self.do_output("It's a sturdy rope tied around your ankle and the metal ring")
@@ -104,7 +124,7 @@ class Rope(AdventureObjectInterface):
         self.on_pull()
 
 
-class Ring(AdventureObjectInterface):
+class Ring(AdventureObject):
     def on_lookat(self):
         if self.check_state('is_rope_attached'):
             self.do_output("It's a rusty, metal ring with a rope securely attached to it")
@@ -116,7 +136,7 @@ class Ring(AdventureObjectInterface):
 
     def on_pull(self):
         if self.check_state('is_rope_attached'):
-            self.do_output("The rust gives out, and the metal ring crumbles, freeing the rope and your ankle. Guess it wasn't so secure after all!")
+            self.do_output("The rusted metal gives out and the ring crumbles, freeing the rope and your ankle. Guess it wasn't so secure after all!")
             self.set_state('is_rope_attached', False)
         else:
             self.do_output("Nothing happens")
@@ -125,7 +145,7 @@ class Ring(AdventureObjectInterface):
         self.on_pull()
 
 
-class Table(AdventureObjectInterface):
+class Table(AdventureObject):
     def on_lookat(self) -> None:
         if self.check_state('is_dagger_stuck'):
             self.do_output("It's a table with a dagger stuck in it")
@@ -142,33 +162,25 @@ class Table(AdventureObjectInterface):
         self.on_pickup()
 
 
-class Dagger(AdventureObjectInterface):
+class Dagger(AdventureObject):
     def on_lookat(self):
         self.do_output("It's a rusty, old dagger")
 
     def on_pickup(self):
         if self.check_state('is_rope_attached'):
-            self.do_output("You reach for the dagger but the rope around your ankle prevents you from reaching it")
-        elif self.in_inventory():
-            self.do_output("The dagger is in your inventory")
+            self.do_output("You reach for the dagger but the rope around your ankle prevents you from obtaining it")
         else:
-            self.do_output("Dagger has been added to your inventory")
             self.add_to_inventory()
             self.set_state('is_dagger_stuck', False)
 
 
-class Lock(AdventureObjectInterface):
+class Lock(AdventureObject):
     def on_lookat(self):
         if self.check_state('is_door_locked'):
             self.do_output("It's locked")
 
 
-class Inv(AdventureObjectInterface):
-    def on_lookat(self):
-        self.room.output_inventory_contents()
-
-
-class TestRoom(AdventureRoomInterface):
+class TestRoom(AdventureRoom):
     state = {
         'is_first_look': True,
         'is_rope_attached': True,
@@ -179,25 +191,27 @@ class TestRoom(AdventureRoomInterface):
 
     def __init__(self):
         self.cell = Cell(self, ['cell', 'room'])
-        self.bed = Bed(self, ['bed', 'mattress'])
+        self.bed = Bed(self, ['bed'])
+        self.mattress = Mattress(self, ['mattress'])
         self.fish = Fish(self, ['fish', 'can', 'food'])
         self.oil = Oil(self, ['oil', 'grease'])
         self.pillow = Pillow(self, ['pillow'])
         self.brick = Brick(self, ['brick', 'stone', 'rock'])
         self.magazine = Magazine(self, ['magazine', 'book'])
-        self.rope = Rope(self, ['rope', 'cord', 'knot', 'tie'])
+        self.rope = Rope(self, ['rope', 'chain', 'cord', 'knot', 'tie'])
         self.ring = Ring(self, ['ring', 'metal'])
         self.table = Table(self, ['table'])
         self.dagger = Dagger(self, ['dagger', 'blade', 'knife'])
         self.lock = Lock(self, ['lock', 'door'])
-        self.inv = Inv(self, ['inventory'])
         super().__init__()
 
         self.cell.on_lookat()
+        self.state['is_first_look'] = False
+
         while self.state['is_door_locked'] is True:
             (action, objects) = self.parser.wait_for_input()
             if len(objects) is 0:
-                self.parser.do_output("Could not parse command")
+                self.parser.do_output(f"{ANSIColors.RED}Could not parse command{ANSIColors.ENDC}")
             else:
                 for obj in objects:
                     obj.perform_action(action)

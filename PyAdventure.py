@@ -1,5 +1,5 @@
 from game.TestRoom import TestRoom
-from utils import ANSIColors
+from engine.utils import ANSIColors
 
 
 class PyAdventure:

@@ -1,7 +1,7 @@
 import re
 
-from engine import AdventureObjectInterface
-from utils import AdventureAction, ANSIColors
+from engine import AdventureInterfaces
+from engine.utils import AdventureAction, ANSIColors
 
 
 class TextParser:
@@ -9,15 +9,15 @@ class TextParser:
     Text parser used for parsing player input
     """
 
-    LOOK_SYNONYMS = ["look", "view", "examine", "study", "observe", "sight", "see"]
-    PICKUP_SYNONYMS = ["pick", "take", "grab", "collect", "gather"]
-    USE_SYNONYMS = ["use", "put"]
-    PUSH_SYNONYMS = ["push", "shove", "press", "bump", "knock", "ram", "jolt", "prod", "hit"]
-    PULL_SYNONYMS = ["pull", "tug", "draw", "heave", "lug", "jerk", "twist", "pry", "yank"]
+    LOOK_SYNONYMS = ["look", "lookat", "view", "examine", "study", "observe", "sight", "see", "l"]
+    PICKUP_SYNONYMS = ["pick", "pickup", "take", "grab", "collect", "gather", "p"]
+    USE_SYNONYMS = ["use", "useon", "put", "with", "u"]
+    PUSH_SYNONYMS = ["push", "pushon", "shove", "press", "bump", "knock", "ram", "jolt", "prod", "hit", "s"]
+    PULL_SYNONYMS = ["pull", "pullon", "tug", "draw", "heave", "lug", "jerk", "twist", "pry", "yank", "l"]
 
-    objects: list[AdventureObjectInterface] = []
+    objects: list[AdventureInterfaces] = []
 
-    def __init__(self, objects: list[AdventureObjectInterface]):
+    def __init__(self, objects: list[AdventureInterfaces]):
         self.objects = objects
 
     def __parse_action(self, user_input: list[str]) -> AdventureAction:
@@ -34,7 +34,7 @@ class TextParser:
             return AdventureAction.PULL
         return AdventureAction.UNKNOWN
 
-    def __parse_objects(self, user_input: list[str]) -> list[AdventureObjectInterface]:
+    def __parse_objects(self, user_input: list[str]) -> list[AdventureInterfaces]:
         ui = set(user_input)
         objs = []
         for obj in self.objects:
@@ -43,10 +43,8 @@ class TextParser:
                 objs.append(obj)
         return objs
 
-    def wait_for_input(self) -> (AdventureAction, list[AdventureObjectInterface]):
-        """
-        Waits for input from the player and returns the parsed object and action
-        """
+    def wait_for_input(self) -> (AdventureAction, list[AdventureInterfaces]):
+        """ Waits for input from the player and returns the parsed object and action """
         user_input = input("> ").lower().split(" ")
         return self.__parse_action(user_input), self.__parse_objects(user_input)
 
@@ -57,7 +55,7 @@ class TextParser:
         """
         result = []
         for word in s.split(" "):
-            clean_word = re.sub('\\W', '', word)
+            clean_word = re.sub('[^a-zA-Z0-9]', '', word)
             found_word = False
             for obj in self.objects:
                 if not found_word and re.search(f" {clean_word} ", f" {' '.join(obj.keywords)} ", re.IGNORECASE):
