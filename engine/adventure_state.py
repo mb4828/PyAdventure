@@ -7,7 +7,9 @@ class AdventureState:
         'is_rope_attached': True,
         'is_dagger_stuck': True,
         'is_brick_hidden': True,
-        'is_door_locked': True
+        'is_door_locked': True,
+        'is_door_oiled': False,
+        'is_door_open': False
     }
 
     def get(self, key):

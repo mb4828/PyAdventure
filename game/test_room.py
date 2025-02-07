@@ -5,7 +5,7 @@ from engine.utils import AdventureAction
 
 class Cell(AdventureObject):
     def on_lookat(self) -> None:
-        text = f"You {'awake' if self.check_state('is_first_look') else 'are'} in a cell containing a bed, a table, and a barred door with a lock on it \n"
+        text = f"You {'awake' if self.check_state('is_first_look') else 'are'} in a cell containing a bed, a table, and a barred door with a {'smashed ' if not self.check_state('is_door_locked') else ''}lock on it \n"
 
         text += "On the bed is a flimsy, thatched mattress, an uncomfortable-looking pillow, and a copy of `Arr and `Arr magazine \n"
 
@@ -94,8 +94,21 @@ class Brick(AdventureObject):
             self.add_to_inventory()
 
     def on_use(self, use_with):
-        # TODO
-        pass
+        if self.check_state('is_brick_hidden'):
+            self.on_unknown()
+        elif use_with is self.room.rope:
+            self.do_output("You smash the rope with the brick, but it doesn't budge. That thing is solid")
+        elif use_with is self.room.ring:
+            self.do_output("You smash the ring with the brick. Some rusty metal flies off, but the ring is still intact")
+        elif self.check_state('is_rope_attached'):
+            self.do_output("The rope around your ankle becomes snug. You can't reach it")
+        elif use_with is self.room.door:
+            self.do_output("You smash the door with the brick, but it doesn't budge. That thing is solid")
+        elif use_with is self.room.lock:
+            self.do_output("You smash the lock with the brick, breaking it open. Freedom?")
+            self.set_state('is_door_locked', False)
+        else:
+            self.do_output('Nothing happens')
 
 
 class Magazine(AdventureObject):
@@ -181,11 +194,32 @@ class Dagger(AdventureObject):
             self.add_to_inventory()
             self.set_state('is_dagger_stuck', False)
 
+    def on_use(self, use_with=None):
+        if use_with is None:
+            self.on_pickup()
+        elif use_with is self.room.rope:
+            self.do_output("The rope is too thick to cut with the dagger")
+        elif use_with is self.room.ring:
+            self.do_output("The ring is too thick to cut with the dagger")
+        elif use_with is self.room.door:
+            self.do_output("The door is too thick to cut with the dagger")
+        elif use_with is self.room.lock:
+            self.do_output("The lock is too thick to cut with the dagger")
+        elif use_with is self.room.pillow:
+            self.do_output("The dagger cuts through the pillow, hitting something hard inside")
+        elif use_with is self.room.mattress:
+            self.do_output("The dagger cuts through the mattress, but doesn't seem to do anything")
+        else:
+            self.do_output("Nothing happens")
+
 
 class Lock(AdventureObject):
     def on_lookat(self):
         if self.check_state('is_door_locked'):
             self.do_output("It's locked")
+        else:
+            self.do_output("The lock is smashed to pieces")
+            self.set_state('is_door_locked', False)
 
     def on_pickup(self):
         self.on_lookat()
@@ -195,6 +229,36 @@ class Lock(AdventureObject):
 
     def on_pull(self):
         self.on_lookat()
+
+    def on_use(self, use_with=None):
+        self.on_lookat()
+
+class Door(AdventureObject):
+    def on_lookat(self):
+        if self.check_state('is_door_locked'):
+            self.do_output("It's a sturdy, metal door with a lock on it")
+        else:
+            self.do_output("It's a sturdy, metal door with a broken lock on it")
+
+    def on_pickup(self):
+        self.on_lookat()
+
+    def on_push(self):
+        if self.check_state('is_rope_attached'):
+            self.do_output("The rope around your ankle becomes snug. You can't reach it")
+        elif not self.check_state('is_door_locked') and not self.check_state('is_door_oiled'):
+            self.do_output("The door won't budge")
+        elif self.check_state('is_door_locked') and self.check_state('is_door_oiled'):
+            self.do_output("The door opens and you escape to freedom!")
+            self.set_state('is_door_open', True)
+        else:
+            self.do_output("The door won't budge. What gives?")
+
+    def on_pull(self):
+        self.on_push()
+
+    def on_use(self, use_with=None):
+        self.on_push()
 
 
 class TestRoom(AdventureRoom):
@@ -211,16 +275,18 @@ class TestRoom(AdventureRoom):
         self.ring = Ring(self, ['ring', 'metal'])
         self.table = Table(self, ['table'])
         self.dagger = Dagger(self, ['dagger', 'blade', 'knife'])
-        self.lock = Lock(self, ['lock', 'door'])
+        self.lock = Lock(self, ['lock', 'keyhole'])
+        self.door = Door(self, ['door', 'entrance', 'exit'])
         super().__init__()
 
         self.cell.on_lookat()
         self.state.set('is_first_look', False)
 
-        while self.state.get('is_door_locked') is True:
+        while self.state.get('is_door_open') is False:
             (action, objects) = self.parser.wait_for_input()
-            if len(objects) is 0:
-                self.cell.on_unknown()
+            if len(objects) == 1:
+                objects[0].perform_action(action)
+            elif len(objects) == 2 and action is AdventureAction.USE:
+                objects[0].perform_action(action, objects[1])
             else:
-                for obj in objects:
-                    obj.perform_action(action)
+                self.cell.on_unknown()

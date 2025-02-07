@@ -26,7 +26,7 @@ class AdventureObject:
         """ Logic for when object is picked up """
         self.do_output("Nothing happens")
 
-    def on_use(self, use_with) -> None:
+    def on_use(self, use_with=None) -> None:
         """ Logic for when object is used """
         self.do_output("Nothing happens")
 
@@ -44,15 +44,14 @@ class AdventureObject:
 
     ### HELPER METHODS - DO NOT OVERRIDE ###
 
-    def perform_action(self, action: AdventureAction) -> None:
+    def perform_action(self, action: AdventureAction, use_with=None) -> None:
         """ Performs the desired action by invoking the on_action method """
         if action is AdventureAction.LOOK_AT:
             self.on_lookat()
         elif action is AdventureAction.PICK_UP:
             self.on_pickup()
         elif action is AdventureAction.USE:
-            # TODO
-            pass
+            self.on_use(use_with)
         elif action is AdventureAction.PUSH:
             self.on_push()
         elif action is AdventureAction.PULL:

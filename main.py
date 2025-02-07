@@ -10,7 +10,7 @@ class PyAdventure:
         print(
             f"{ANSIColors.GREEN}{ANSIColors.BOLD}{ANSIColors.UNDERLINE}PY ADVENTURE{ANSIColors.ENDC}\n")
         print("A text adventure game prototype developed by Matt Brauner")
-        print("(c) Copyright 2022\n")
+        print("(c) Copyright 2025\n")
         print(f"Instructions: Type commands into the prompter to complete the adventure. Available verbs are: "
               f"{ANSIColors.BLUE} LOOK AT, PICK UP, USE, PUSH, PULL {ANSIColors.ENDC}\n")
         TestRoom()
